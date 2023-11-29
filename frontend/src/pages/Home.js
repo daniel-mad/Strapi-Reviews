@@ -2,6 +2,7 @@ import React from "react";
 // import useFetch from "../hooks/useFetch";
 import { Link } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
+import ReactMarkdown from "react-markdown";
 
 const REVIEWS = gql`
   query GetReviews {
@@ -12,6 +13,14 @@ const REVIEWS = gql`
           title
           rating
           body
+          categories {
+            data {
+              id
+              attributes {
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -36,6 +45,10 @@ const Home = () => {
       title: review.attributes.title,
       rating: review.attributes.rating,
       body: review.attributes.body,
+      categories: review.attributes.categories.data.map((category) => ({
+        id: category.id,
+        name: category.attributes.name,
+      })),
     }));
   }
 
@@ -46,8 +59,11 @@ const Home = () => {
           <div className="rating">{review.rating}</div>
           <h2>{review.title}</h2>
 
-          <small>console list</small>
-          <p>{review.body.substring(0, 200)} ...</p>
+          {review.categories.map((c) => (
+            <small key={c.id}>{c.name}</small>
+          ))}
+          <ReactMarkdown>{`${review.body.substring(0, 200)}...`}</ReactMarkdown>
+
           <Link to={`/details/${review.id}`}>Read more</Link>
         </div>
       ))}
